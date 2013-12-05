@@ -101,7 +101,11 @@ act
 		my $val = ${$res}{$var};
 		printf " %s = ", $var;
 		unless (ref($val)) {
-			printf "%s\n", $val;
+			if (defined($val)) {
+				printf "%s\n", $val;
+			} else {
+				print "<undef>\n";
+			}
 			next;
 		}
 		if (ref($val) eq "HASH") {
