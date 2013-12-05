@@ -22,7 +22,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Finance::btce ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(BtceConversion BTCtoUSD LTCtoBTC LTCtoUSD BtceDepth BtceTrades) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(BtceConversion BTCtoUSD LTCtoBTC LTCtoUSD BtceDepth BtceTrades BtceFee) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -140,6 +140,13 @@ sub Trade
 	} else {
 		croak "Trade requires pair+type+rate+amount args";
 	}
+	$args->{rate} = $self->_trunc($args->{pair}, $args->{rate});
+	# this is invaluable as a sanity check, make configurable?
+	print STDERR "Trade: ";
+	foreach my $a (keys %{$args}) {
+		printf STDERR "%s=%s, ", $a, ${$args}{$a};
+	}
+	print STDERR "\n";
 	return $self->_post('Trade', $args);
 }
 
@@ -190,8 +197,17 @@ sub _apiget
 sub _apiprice
 {
 	my ($version, $exchange) = @_;
+	if (!defined($exchange) || !defined($version)) {
+		my %i;
+		return  \%i;
+	}
 
-	my %ticker = %{_apiget($version, "https://btc-e.com/api/2/".$exchange."/ticker")};
+	my $ret = _apiget($version, "https://btc-e.com/api/2/".$exchange."/ticker");
+	if (!defined($ret)) {
+		my %i;
+		return \%i;
+	}
+	my %ticker = %{$ret};
 	if (! keys %ticker || ! defined($ticker{'ticker'})) {
 		return \%ticker;
 	}
@@ -243,7 +259,7 @@ sub _createnonce
 {
 	my ($self) = @_;
 	if (!defined($self->{nonce})) {
-		$self->{nonce} = int(rand(INT_MAX));
+		$self->{nonce} = int(rand(INT_MAX/2));
 	} else {
 		$self->{nonce}++;
 	}
@@ -264,6 +280,16 @@ sub _mech
 	my ($self) = @_;
 
 	return $self->{mech};
+}
+
+sub _newagent
+{
+	my ($version) = @_;
+	my $agent = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1}, env_proxy => 1);
+	if (defined($version)) {
+		$agent->agent($version);
+	}
+	return $agent;
 }
 
 sub _post
@@ -288,15 +314,18 @@ sub _post
 	$req->content($query);
 	$req->header('Key' => $self->_apikey);
 	$req->header('Sign' => $self->_sign($query));
-	retry:
+	my $retrycount = 0;
+	retrypost:
 	eval {
 		$self->_mech->request($req);
 	};
 	if ($@) {
-		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare)/) {
+		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to)/) {
 			print STDERR "!";
-			sleep(5);
-			goto retry;
+			if ($retrycount++ < 30) {
+				sleep(5);
+				goto retrypost;
+			}
 		}
 		printf STDERR "_post: self->_mech->_request: %s\n", $@;
 		my %empty;
@@ -328,16 +357,48 @@ sub _sign
 	return hmac_sha512_hex($params,$self->_secretkey);
 }
 
-sub _newagent
+sub _trunc
 {
-	my ($version) = @_;
-	my $agent = LWP::UserAgent->new(ssl_opts => {verify_hostname => 1}, env_proxy => 1);
-	if (defined($version)) {
-		$agent->agent($version);
-	}
-	return $agent;
-}
+	my ($self, $pair, $amount) = @_;
 
+	# max digits (from api.rb) # XXX where did they come from?
+	my %trunclist = (
+		"btc_usd" => 3,
+		"btc_eur" => 3,
+		"btc_rur" => 4,
+		"eur_usd" => 4,
+		"ftc_btc" => 4,
+		"ltc_btc" => 5,
+		"ltc_eur" => 4,
+		"ltc_rur" => 4,
+		"ltc_usd" => 6,
+		"nmc_btc" => 4,
+		"nmc_usd" => 6,
+		"nvc_btc" => 4,
+		"nvc_usd" => 1,
+		"ppc_btc" => 4,
+		"ppc_usd" => 4,
+		"trc_btc" => 6,
+		"usd_rur" => 4,
+		"xpm_btc" => 6
+	);
+
+	if (! grep {/$pair/} keys %trunclist) {
+		printf STDERR "trunc: pair %s not found\n",$pair;
+		return $amount;
+	}
+	return $self->__trunc($amount, $trunclist{$pair});
+}
+sub __trunc
+{
+	my ($self, $amount, $digits) = @_;
+
+	my $fmt = "%0.".$digits."f";
+	my $zeros = "0" x $digits;
+	my $adjustment = "0.".$zeros."5";
+	my $adjusted = sprintf $fmt, ($amount-$adjustment);
+	return $adjusted;
+}
 
 1;
 __END__
