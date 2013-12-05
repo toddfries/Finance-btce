@@ -373,7 +373,7 @@ sub _trunc
 		"ltc_rur" => 4,
 		"ltc_usd" => 6,
 		"nmc_btc" => 4,
-		"nmc_usd" => 6,
+		"nmc_usd" => 2,
 		"nvc_btc" => 4,
 		"nvc_usd" => 1,
 		"ppc_btc" => 4,
@@ -392,11 +392,15 @@ sub _trunc
 sub __trunc
 {
 	my ($self, $amount, $digits) = @_;
-
-	my $fmt = "%0.".$digits."f";
-	my $zeros = "0" x $digits;
-	my $adjustment = "0.".$zeros."5";
-	my $adjusted = sprintf $fmt, ($amount-$adjustment);
+	if (! $amount =~ /\./) {
+		return $amount;
+	}
+	my $adjusted;
+	if ($amount =~ /^([0-9]+)\.([0-9]{1,$digits})/) {
+		$adjusted = sprintf "%d.%s",$1,$2;
+	} else {
+		return $amount;
+	}
 	return $adjusted;
 }
 
