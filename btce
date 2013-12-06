@@ -87,6 +87,52 @@ act
 		$res = $btce->Trade($args);
 	} elsif ($argv[0] eq "cancel" && defined($argv[1])) {
 		$res = $btce->CancelOrder($argv[1]);
+	} elsif ($argv[0] eq "calcxlist") {
+		$res = $btce->getInfo;
+		if (!defined(${$res}{success})) {
+			print STDERR "no success running getInfo\n";
+			return;
+		}
+		if (${$res}{success} != 1) {
+			printf STDERR "getInfo: returned %d\n", ${$res}{success};
+			my $err = ${$res}{error};
+			if (defined($err)) {
+				printf STDERR "getInfo: %s\n", $err;
+			}
+			return;
+		}
+		my $funds = ${$res}{return}{funds};
+		if (!defined($funds)) {
+			print STDERR "getInfo: no funds\n";
+			return;
+		}
+		my @funds;
+		foreach my $currency (keys %{$funds}) {
+			push @funds, $currency;
+		}
+		my %exchanges;
+		foreach my $a (@funds) {
+			foreach my $b (@funds) {
+				if ($a eq $b) {
+					next;
+				}
+				my $x = $a."_".$b;
+				my $feeres = BtceFee($x);
+				if (!defined($feeres)) {
+					next;
+				}
+				if (!defined(${$feeres}{trade})) {
+					next;
+				}
+				$exchanges{$x} = ${$feeres}{trade};
+			}
+		}
+
+		foreach my $x (sort keys %exchanges) {
+			printf "\t%s, fee = %s%%\n", $x, $exchanges{$x};
+		}
+
+		return;
 	} else {
 		printf STDERR "Invalid method: %s, bailing!\n", $argv[0];
 		exit(1);
