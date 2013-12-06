@@ -363,9 +363,10 @@ sub _trunc
 
 	# max digits (from api.rb) # XXX where did they come from?
 	my %trunclist = (
-		"btc_usd" => 3,
+
 		"btc_eur" => 3,
 		"btc_rur" => 4,
+		"btc_usd" => 3,
 		"eur_usd" => 4,
 		"ftc_btc" => 4,
 		"ltc_btc" => 5,
@@ -381,6 +382,7 @@ sub _trunc
 		"trc_btc" => 6,
 		"usd_rur" => 4,
 		"xpm_btc" => 6
+
 	);
 
 	if (! grep {/$pair/} keys %trunclist) {
