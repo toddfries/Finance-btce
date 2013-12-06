@@ -369,7 +369,7 @@ sub _trunc
 		"eur_usd" => 4,
 		"ftc_btc" => 4,
 		"ltc_btc" => 5,
-		"ltc_eur" => 4,
+		"ltc_eur" => 2,
 		"ltc_rur" => 4,
 		"ltc_usd" => 6,
 		"nmc_btc" => 4,
@@ -377,7 +377,7 @@ sub _trunc
 		"nvc_btc" => 4,
 		"nvc_usd" => 1,
 		"ppc_btc" => 4,
-		"ppc_usd" => 4,
+		"ppc_usd" => 2,
 		"trc_btc" => 6,
 		"usd_rur" => 4,
 		"xpm_btc" => 6
