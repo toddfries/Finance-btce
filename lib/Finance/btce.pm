@@ -179,7 +179,9 @@ sub _apiget
 	if ($@) {
 		if ($response =~ /Please try again in a few minutes/ ||
 			$response =~ /handshake problems/ ||
-			$response =~ /connection issue between CloudFare/ ||
+			$response =~ /unknown connection issue between CloudFare/ ||
+			$response =~ /Can't connect to/ ||
+			$response =~ /Bad Gateway/ ||
 			$response =~ /Connection timed out/) {
 			print STDERR "!";
 			sleep(5);
@@ -320,7 +322,7 @@ sub _post
 		$self->_mech->request($req);
 	};
 	if ($@) {
-		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to)/) {
+		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to|Bad Gateway)/) {
 			print STDERR "!";
 			if ($retrycount++ < 30) {
 				sleep(5);
