@@ -434,7 +434,7 @@ sub _trunc
 		"nvc_btc" => 4,
 		"nvc_usd" => 1,
 		"ppc_btc" => 4,
-		"ppc_usd" => 2,
+		"ppc_usd" => 3,
 		"trc_btc" => 6,
 		"usd_rur" => 4,
 		"xpm_btc" => 6
