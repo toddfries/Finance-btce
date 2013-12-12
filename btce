@@ -31,6 +31,7 @@ if (-f $configfile) {
 		chomp($line = $_);
 		if ($line =~ /^([a-z]+)\s*=\s*(.*)$/) {
 			my ($var,$val) = ($1,$2);
+			$val =~ s/#.*$//g;
 			if ($var eq "apikey") {
 				$apikey = $val;
 			} elsif ($var eq "secret") {
