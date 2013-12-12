@@ -26,7 +26,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(BtceConversion BTCtoUSD LTCtoBTC LTCtoUSD Btc
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(new);
+our @EXPORT = qw(new get set);
 
 our $VERSION = '0.1';
 
@@ -70,20 +70,20 @@ sub BtceDepth
 	my ($exchange) = @_;
 	return _apidepth('Mozilla/4.76 [en] (Win98; U)', $exchange);
 }
-	
+
 
 ### Authenticated API calls
 
 sub new
 {
 	my ($class, $args) = @_;
-	
+
 	my $self = {
 		mech => WWW::Mechanize->new(stack_depth => 0, quiet=>0),
 		apikey => ${$args}{'apikey'},
 		secret => ${$args}{'secret'},
 	};
-	
+
 	unless ($self->{'apikey'} && $self->{'secret'})
 	{
 		croak "You must provide an apikey and secret";
@@ -149,6 +149,46 @@ sub Trade
 	print STDERR "\n";
 	return $self->_post('Trade', $args);
 }
+
+sub set
+{
+	my ($self, $var, @vals)  = @_;
+
+	if ($var eq 'fee') {
+		my $ex = $vals[0];
+		my $fee = $vals[1];
+		$self->{fee}{$ex} = $fee;
+	}
+}
+
+sub get
+{
+	my ($self, $var, @args) = @_;
+
+	if ($var eq 'fee') {
+		my $ex = $args[0];
+		my $fee = $self->{fee}{$ex};
+
+		if (defined($fee)) {
+			goto feereturn;
+		}
+		my $res = BtceFee($ex);
+		$fee = $res->{trade};
+		if (defined($fee)) {
+			goto feeset;
+		}
+
+		feedefault:
+		$fee = 0.2;
+
+		feeset:
+		$self->set('fee', $ex, $fee);
+
+		feereturn:
+		return $fee * .01;
+	}
+}
+
 
 #private methods
 
@@ -442,13 +482,13 @@ Version 0.01
 	secret => 'secret',});
 
   #public API calls
-  
+
   #Prices for Bitcoin to USD
   my %price = %{BtceConversion('btc_usd')};
 
   #Prices for Litecoin to Bitcoin
   my %price = %{BtceConversion('ltc_btc')};
-  
+
   #Prices for Litecoin to USD
   my %price = %{BtceConversion('ltc_usd')};
 
