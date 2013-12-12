@@ -45,11 +45,14 @@ if (-f $configfile) {
 	close(CONFIG);
 }
 
+my $btce;
+
 if (!defined($apikey) || !defined($secret)) {
-	printf STDERR "Either apikey or secret undefined, bailing\n";
+	printf STDERR "Either apikey or secret undefined, functions requiring this will not work\n";
+} else {
+	$btce = Finance::btce->new( { apikey => $apikey, secret => $secret, });
 }
 
-my $btce = Finance::btce->new( { apikey => $apikey, secret => $secret, });
 
 sub
 act
@@ -62,6 +65,9 @@ act
 		return;
 	}
 	if ($argv[0] eq "getinfo") {
+		if (!defined($btce)) {
+			goto apikeywarn;
+		}
 		$res = $btce->getInfo();
 	} elsif ($argv[0] eq "quit") {
 		exit(0);
@@ -80,6 +86,9 @@ act
 	} elsif ($argv[0] eq "activeorders") {
 		$res = $btce->ActiveOrders($argv[1]);
 	} elsif ($argv[0] eq "trade") {
+		if (!defined($btce)) {
+			goto apikeywarn;
+		}
 		my $args;
 		${$args}{'pair'} = $argv[1];
 		${$args}{'type'} = $argv[2];
@@ -87,8 +96,14 @@ act
 		${$args}{'amount'} = $argv[4];
 		$res = $btce->Trade($args);
 	} elsif ($argv[0] eq "cancel" && defined($argv[1])) {
+		if (!defined($btce)) {
+			goto apikeywarn;
+		}
 		$res = $btce->CancelOrder($argv[1]);
 	} elsif ($argv[0] eq "calcxlist") {
+		if (!defined($btce)) {
+			goto apikeywarn;
+		}
 		$res = $btce->getInfo;
 		if (!defined(${$res}{success})) {
 			print STDERR "no success running getInfo\n";
@@ -246,6 +261,9 @@ act
 		}
 		print ")\n";
 	}
+	next;
+	apikeywarn:
+	printf STDERR "%s requires an api key, noop\n", $argv[0];
 }
 
 if (@ARGV) {
