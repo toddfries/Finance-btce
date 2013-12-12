@@ -261,7 +261,8 @@ sub _createnonce
 {
 	my ($self) = @_;
 	if (!defined($self->{nonce})) {
-		$self->{nonce} = int(rand(INT_MAX/2));
+		#$self->{nonce} = int(rand(INT_MAX/2));
+		$self->{nonce} = int(rand(INT_MAX));
 	} else {
 		$self->{nonce}++;
 	}
@@ -333,7 +334,20 @@ sub _post
 		my %empty;
 		return \%empty;
 	}
-	my %result = %{$self->_decode};
+	#printf STDERR "_post: self->_decode content='%s'\n",
+	#    $self->_mech->content;
+	my %result;
+	my $res;
+	eval {
+		$res = $self->_decode;
+	};
+	if ($@) {
+		printf STDERR "_post: self->_decode: %s\n", $@;
+		printf STDERR "_post: self->_decode content='%s'\n",
+		    $self->_mech->content;
+		return \%result;
+	}
+	%result = %{$res};
 	if (defined($result{success}) && defined($result{error})) {
 		if ($result{success} == 0 && $result{error} =~
 		    /invalid nonce parameter; on key:([0-9]+),/) {
