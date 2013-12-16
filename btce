@@ -150,8 +150,8 @@ act
 
 		return;
 	} else {
-		printf STDERR "Invalid method: %s, bailing!\n", $argv[0];
-		exit(1);
+		printf STDERR "Unimplemented method: '%s'\n", $argv[0];
+		return;
 	}
 
 	if (ref($res) eq "HASH") {
@@ -261,7 +261,7 @@ act
 		}
 		print ")\n";
 	}
-	next;
+	return;
 	apikeywarn:
 	printf STDERR "%s requires an api key, noop\n", $argv[0];
 }
