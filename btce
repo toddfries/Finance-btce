@@ -77,7 +77,12 @@ act
 		    'buy', 'sell' );
 	} elsif ($argv[0] eq "fee" && defined($argv[1])) {
 		$res = BtceFee($argv[1]);
-	} elsif ($argv[0] eq "trades" && defined($argv[1])) {
+	} elsif ($argv[0] eq "trades") {
+		my $pair = $argv[1];
+		if (!defined($pair)) {
+			print STDERR "exchange is a missing required arg\n";
+			return;
+		}
 		$res = BtceTrades($argv[1]);
 	} elsif ($argv[0] eq "depth" && defined($argv[1])) {
 		$res = BtceDepth($argv[1]);
