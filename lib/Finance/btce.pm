@@ -331,6 +331,34 @@ sub _decode
 	return \%apireturn;
 }
 
+# a list of exchanges we expect to exist; only added to the actual exchange
+# list if verified properly
+sub _get_x_checklist
+{
+	return ((
+
+		"btc_eur",
+		"btc_rur",
+		"btc_usd",
+		"eur_usd",
+		"ftc_btc",
+		"ltc_btc",
+		"ltc_eur",
+		"ltc_rur",
+		"ltc_usd",
+		"nmc_btc",
+		"nmc_usd",
+		"nvc_btc",
+		"nvc_usd",
+		"ppc_btc",
+		"ppc_usd",
+		"trc_btc",
+		"usd_rur",
+		"xpm_btc",
+
+	));
+}
+
 sub _mech
 {
 	my ($self) = @_;
