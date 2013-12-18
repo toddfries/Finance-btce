@@ -167,7 +167,20 @@ sub get
 
 	if ($var eq 'fee') {
 		my $ex = $args[0];
-		my $fee = $self->{fee}{$ex};
+		my $fee;
+		eval {
+			$fee = $self->{fee}{$ex};
+		};
+		if ($@) {
+			printf STDERR "get('%s',%s): %s\n", $var, $ex, $@;
+			eval {
+				use Data::Dumper;
+			};
+			if (!$@) {
+				Data::Dumper->Dump([$self]);
+			}
+			exit(1);
+		}
 
 		if (defined($fee)) {
 			goto feereturn;
@@ -423,17 +436,17 @@ sub _trunc
 		"btc_eur" => 3,
 		"btc_rur" => 4,
 		"btc_usd" => 3,
-		"eur_usd" => 4,
-		"ftc_btc" => 4,
+		"eur_usd" => 5,
+		"ftc_btc" => 5,
 		"ltc_btc" => 5,
-		"ltc_eur" => 2,
+		"ltc_eur" => 3,
 		"ltc_rur" => 4,
 		"ltc_usd" => 6,
 		"nmc_btc" => 4,
-		"nmc_usd" => 2,
-		"nvc_btc" => 4,
-		"nvc_usd" => 1,
-		"ppc_btc" => 4,
+		"nmc_usd" => 3,
+		"nvc_btc" => 5,
+		"nvc_usd" => 3,
+		"ppc_btc" => 5,
 		"ppc_usd" => 3,
 		"trc_btc" => 6,
 		"usd_rur" => 4,
