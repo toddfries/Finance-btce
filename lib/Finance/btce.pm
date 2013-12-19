@@ -235,6 +235,7 @@ sub _apiget
 			$response =~ /unknown connection issue between CloudFare/ ||
 			$response =~ /Can't connect to/ ||
 			$response =~ /Bad Gateway/ ||
+			$response =~ /Origin Error/ ||
 			$response =~ /Connection timed out/) {
 			print STDERR "!";
 			sleep(5);
@@ -286,8 +287,14 @@ sub _apifee
 {
 	my ($version, $exchange) = @_;
 
-	my %fees = %{_apiget($version, "https://btc-e.com/api/2/".$exchange."/fee")};
-	return \%fees;
+	my $res = _apiget($version, "https://btc-e.com/api/2/".$exchange."/fee");
+	if (!defined($res)) {
+		return undef;
+	}
+	if (ref($res) ne "HASH") {
+		return undef;
+	}
+	return \%{$res};
 }
 
 sub _apitrades
@@ -404,7 +411,7 @@ sub _post
 		$self->_mech->request($req);
 	};
 	if ($@) {
-		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to|Bad Gateway)/) {
+		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to|Bad Gateway|Origin Error)/) {
 			print STDERR "!";
 			if ($retrycount++ < 30) {
 				sleep(5);
