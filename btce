@@ -19,7 +19,12 @@ use warnings;
 
 use Term::ReadLine;
 
+eval {
 use Finance::btce ':all';
+};
+if ($@) {
+	printf STDERR "You need to install p5-Finance-btce\n";
+}
 
 my ($apikey, $secret);
 
@@ -156,6 +161,10 @@ act
 		return;
 	} else {
 		printf STDERR "Unimplemented method: '%s'\n", $argv[0];
+		return;
+	}
+
+	if (!defined($res)) {
 		return;
 	}
 
