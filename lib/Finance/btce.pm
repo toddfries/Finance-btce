@@ -312,15 +312,23 @@ sub _apidepth
 
 # A word about nonces.  Nowhere can I find this documented, but through
 # experience I have figured out that the nonce is a unique integer per api key
-# that must be incremented per reqest.  Whatever one starts out with, one must
+# that must be incremented per request.  Whatever one starts out with, one must
 # increment.  Thus unix time seems appropriate for most use cases.
-# In the event multiple apps are using the same api key (debug daemon + reg
+# In the event multiple apps are using the same api key (debug daemon +
+# cli app) then we recover and set the nonce from the server which kindly
+# tells us what the next one should be.
+
+# Initially int(rand(INT_MAX)) was used, but hitting the max acceptable value
+# is undefined, worst case have to get a new api key.
+
+# so, instead, choose INT_MAX/4 to ensure the initial value is in the lower
+# 1/4 of our integer range, pleanty of room if randomly we hit a high number
+# to start with.
 sub _createnonce
 {
 	my ($self) = @_;
 	if (!defined($self->{nonce})) {
-		#$self->{nonce} = int(rand(INT_MAX/2));
-		$self->{nonce} = int(rand(INT_MAX));
+		$self->{nonce} = int(rand(INT_MAX/4));
 	} else {
 		$self->{nonce}++;
 	}
