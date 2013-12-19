@@ -216,6 +216,7 @@ sub _apiget
 	my ($version, $url) = @_;
 
 	my $browser = _newagent($version);
+	my $retrycount = 0;
 	retryapiget:
 	my $resp = $browser->get($url);
 	my $response = $resp->content;
@@ -230,18 +231,15 @@ sub _apiget
 		return $ret;
 	}
 	if ($@) {
-		if ($response =~ /Please try again in a few minutes/ ||
-			$response =~ /handshake problems/ ||
-			$response =~ /unknown connection issue between CloudFare/ ||
-			$response =~ /Can't connect to/ ||
-			$response =~ /Bad Gateway/ ||
-			$response =~ /Origin Error/ ||
-			$response =~ /Connection timed out/) {
+		if (_known_error($response)) {
+			if ($retrycount++ < 1) {
+				print STDERR "_apiget error";
+			}
 			print STDERR "!";
-			sleep(5);
+			sleep(5+int($retrycount/3));
 			goto retryapiget;
 		}
-		printf STDERR "ApiGet(%s, %s): response = '%s'\n",
+		printf STDERR "ApiGet(%s, %s): unhandled response = '%s'\n",
 			$version, $url, $response;
 		printf STDERR "ApiPrice(%s, %s): %s\n", $version, $url, $@;
 		my %i;
@@ -366,6 +364,28 @@ sub _get_x_checklist
 	));
 }
 
+sub _known_error
+{
+	my ($string) = @_;
+
+	my @known_errs = (
+			'Please try again in a few minutes',
+			'handshake problems',
+			'unknown connection issue between CloudFare',
+			'Can\'t connect to',
+			'Bad Gateway',
+			'Origin Error',
+			'Connection timed out',
+	);
+
+	foreach my $err (@known_errs) {
+		if ($string =~ /$err/) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 sub _mech
 {
 	my ($self) = @_;
@@ -411,14 +431,14 @@ sub _post
 		$self->_mech->request($req);
 	};
 	if ($@) {
-		if ($@ =~ /(Connection timed out|Please try again in a few minute|handshake problems|unknown connection issue between CloudFare|Can't connect to|Bad Gateway|Origin Error)/) {
+		if (_known_error($@)) {
 			print STDERR "!";
 			if ($retrycount++ < 30) {
-				sleep(5);
+				sleep(5+int($retrycount/3));
 				goto retrypost;
 			}
 		}
-		printf STDERR "_post: self->_mech->_request: %s\n", $@;
+		printf STDERR "_post: request: unknown error: %s\n", $@;
 		my %empty;
 		return \%empty;
 	}
