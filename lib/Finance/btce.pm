@@ -377,13 +377,16 @@ sub _known_error
 	my ($string) = @_;
 
 	my @known_errs = (
+
+			'Bad Gateway',
+			'Can\'t connect to',
+			'Connection timed out',
+			'Origin Error',
 			'Please try again in a few minutes',
+			'Server closed connection without sending any data back',
 			'handshake problems',
 			'unknown connection issue between CloudFare',
-			'Can\'t connect to',
-			'Bad Gateway',
-			'Origin Error',
-			'Connection timed out',
+
 	);
 
 	foreach my $err (@known_errs) {
@@ -526,16 +529,8 @@ sub _trunc
 sub __trunc
 {
 	my ($self, $amount, $digits) = @_;
-	if (! $amount =~ /\./) {
-		return $amount;
-	}
-	my $adjusted;
-	if ($amount =~ /^([0-9]+)\.([0-9]{1,$digits})/) {
-		$adjusted = sprintf "%d.%s",$1,$2;
-	} else {
-		return $amount;
-	}
-	return $adjusted;
+	my $adjustment = "1e$digits";
+	return floor($amount * $adjustment) / $adjustment;
 }
 
 1;
