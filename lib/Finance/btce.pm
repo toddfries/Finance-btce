@@ -384,6 +384,7 @@ sub _known_error
 			'Origin Error',
 			'Please try again in a few minutes',
 			'Server closed connection without sending any data back',
+			'Service Temporarily Unavailable',
 			'handshake problems',
 			'unknown connection issue between CloudFare',
 
