@@ -26,8 +26,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(BtceConversion BTCtoUSD LTCtoBTC LTCtoUSD Btc
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(new get set);
-
 our $VERSION = '0.1';
 
 our $json = JSON->new->allow_nonref;
