@@ -353,6 +353,7 @@ sub _get_x_checklist
 		"btc_eur",
 		"btc_rur",
 		"btc_usd",
+		"eur_rur",
 		"eur_usd",
 		"ftc_btc",
 		"ltc_btc",
