@@ -80,9 +80,10 @@ sub new
 
 	my $self = {
 		mech => WWW::Mechanize->new(stack_depth => 0, quiet=>0),
-		apikey => ${$args}{'apikey'},
-		secret => ${$args}{'secret'},
 	};
+	if (defined($args)) {
+		$self->set('keys', $args);
+	}
 
 	$self->{mech}->agent_alias('Windows IE 6');
 
@@ -152,6 +153,11 @@ sub set
 		my $ex = $vals[0];
 		my $fee = $vals[1];
 		$self->{fee}{$ex} = $fee;
+	}
+	if ($var eq 'keys') {
+		my $args = $vals[0];
+		$self->{apikey} = $args->{apikey};
+		$self->{secret} = $args->{secret};
 	}
 }
 
