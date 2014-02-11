@@ -84,12 +84,6 @@ sub new
 		secret => ${$args}{'secret'},
 	};
 
-	unless ($self->{'apikey'} && $self->{'secret'})
-	{
-		croak "You must provide an apikey and secret";
-		return undef;
-	}
-
 	$self->{mech}->agent_alias('Windows IE 6');
 
 	return bless $self, $class;
