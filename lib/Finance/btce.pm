@@ -417,6 +417,10 @@ sub _newagent
 sub _post
 {
 	my ($self, $method, $args) = @_;
+	if (!defined($self->{apikey}) || !defined($self->{secret})) {
+		my %empty;
+		return \%empty;
+	}
 	retrynonce:
 	my $uri = URI->new("https://btc-e.com/tapi");
 	my $req = HTTP::Request->new( 'POST', $uri );
