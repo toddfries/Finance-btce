@@ -348,6 +348,7 @@ sub _get_x_checklist
 {
 	return ((
 
+		"btc_cnh",
 		"btc_eur",
 		"btc_rur",
 		"btc_usd",
@@ -355,6 +356,7 @@ sub _get_x_checklist
 		"eur_usd",
 		"ftc_btc",
 		"ltc_btc",
+		"ltc_cnh",
 		"ltc_eur",
 		"ltc_rur",
 		"ltc_usd",
@@ -365,6 +367,7 @@ sub _get_x_checklist
 		"ppc_btc",
 		"ppc_usd",
 		"trc_btc",
+		"usd_cnh",
 		"usd_rur",
 		"xpm_btc",
 
@@ -503,12 +506,14 @@ sub _trunc
 	# max digits (from api.rb) # XXX where did they come from?
 	my %trunclist = (
 
+		"btc_cnh" => 2,
 		"btc_eur" => 3,
 		"btc_rur" => 4,
 		"btc_usd" => 3,
 		"eur_usd" => 5,
 		"ftc_btc" => 5,
 		"ltc_btc" => 5,
+		"ltc_cnh" => 2,
 		"ltc_eur" => 3,
 		"ltc_rur" => 4,
 		"ltc_usd" => 6,
@@ -519,7 +524,8 @@ sub _trunc
 		"ppc_btc" => 5,
 		"ppc_usd" => 3,
 		"trc_btc" => 6,
-		"usd_rur" => 4,
+		"usd_cnh" => 4,
+		"usd_rur" => 5,
 		"xpm_btc" => 6
 
 	);
