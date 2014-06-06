@@ -360,7 +360,7 @@ sub _get_x_checklist
 		"ltc_btc",
 		"ltc_cnh",
 		"ltc_eur",
-		"ltc_bgp",
+		"ltc_gbp",
 		"ltc_rur",
 		"ltc_usd",
 		"nmc_btc",
