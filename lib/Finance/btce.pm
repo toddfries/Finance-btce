@@ -76,7 +76,7 @@ sub new
 {
 	my ($class, $args) = @_;
 
-	my $self = {
+	my $self = bless {
 		mech => WWW::Mechanize->new(stack_depth => 0, quiet=>0),
 	};
 	if (defined($args)) {
@@ -85,7 +85,7 @@ sub new
 
 	$self->{mech}->agent_alias('Windows IE 6');
 
-	return bless $self, $class;
+	return bless $self;
 }
 
 sub getInfo
